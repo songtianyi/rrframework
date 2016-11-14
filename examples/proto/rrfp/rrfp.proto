@@ -1,0 +1,23 @@
+syntax = "proto3";
+package rrfp;
+//import "any.proto";
+import "example.proto";
+
+
+message Message {
+	Head hd = 1;
+	Body by	= 2;
+}
+
+message Head {
+	string sesionNo	= 10;
+	string uniqueId	= 20;
+}
+
+message Body {
+	oneof msgType {
+		example.EchoRequest example_echo_request = 10;
+		example.EchoResponse example_echo_response = 20;
+	}
+}
+
