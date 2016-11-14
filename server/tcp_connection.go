@@ -4,7 +4,9 @@ import (
 	"encoding/binary"
 	"io"
 	"net"
+	"fmt"
 )
+
 
 var (
 	PT_SIZE          = uint32(512) // packet len in byte
@@ -23,10 +25,9 @@ func NewTCPConnection(conn net.Conn) (*TCPConnection) {
 		r: conn,
 		w: conn,
 	}
-
 }
 
-func (c *TCPConnection) setKeepAlive(v bool) error {
+func (c *TCPConnection) SetKeepAlive(v bool) error {
 	return c.conn.(*net.TCPConn).SetKeepAlive(v)
 }
 
@@ -36,12 +37,14 @@ func (c *TCPConnection) Read() (error, []byte) {
 		return err, buf
 	}
 	pl := binary.BigEndian.Uint32(buf[:PT_SIZE_BYTE_LEN])
+	fmt.Println(pl)
 	if pl > PT_SIZE {
 		buf = make([]byte, pl)
 	}
 	if _, err := io.ReadFull(c.r, buf[:pl]); err != nil {
 		return err, buf
 	}
+	fmt.Println(buf[:pl])
 	return nil, buf[:pl]
 }
 
