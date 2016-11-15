@@ -1,0 +1,3 @@
+[submodule "serializer/protobuf"]
+	path = serializer/protobuf
+	url = https://github.com/golang/protobuf.git
