@@ -1,31 +1,32 @@
 package rrhandler
 
 import (
-	"time"
 	"errors"
 	"fmt"
+	"time"
 )
 
-type HandleRegister struct {
-	hmap map[string]Handler
+type HandlerRegister struct {
+	hmap map[string]*HandlerWrapper
 }
 
-func CreateHandleRegister() (error, *HandleRegister) {
-	return nil, &HandleRegister{
-		hmap: make(map[string]Handler),
+func CreateHandlerRegister() (error, *HandlerRegister) {
+	return nil, &HandlerRegister{
+		hmap: make(map[string]*HandlerWrapper),
 	}
 }
 
-func (hr *HandleRegister) Add(key string, w HandlerFuncWrapper, timeout time.Duration) {
-	hr.hmap[key] = Handler{
-		wrapper: w,
-		timeout: timeout,
+func (hr *HandlerRegister) Add(key string, h Handler, t time.Duration) {
+	hr.hmap[key] = &HandlerWrapper{
+		handle:  h,
+		timeout: t,
 	}
 }
 
-func (hr *HandleRegister) Get(key string) (error, interface{}) {
+func (hr *HandlerRegister) Get(key string) (error, *HandlerWrapper) {
 	if _, ok := hr.hmap[key]; !ok {
-		return errors.New(fmt.Sprintf("value for key [%d] not exist in hmap", key)), nil
+		//return errors.New(fmt.Sprintf("value for key [%d] not exist in map", key)), HandlerWrapper{handle: nil, timeout: 0 * time.Second}
+		return errors.New(fmt.Sprintf("value for key [%d] not exist in map", key)), nil
 	}
 	return nil, hr.hmap[key]
 }

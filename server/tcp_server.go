@@ -1,14 +1,16 @@
 package rrserver
 
 import (
-	"fmt"
 	"io"
 	"net"
+	"rrframework/logs"
 	"strconv"
 )
 
 var (
-	CustomHandleConn = func(c *TCPConnection, packet []byte) { fmt.Println("forget rrserver.CustomHandleConn = YourHanleConn in init func?") }
+	CustomHandleConn = func(c *TCPConnection, packet []byte) {
+		logs.Warn("forget rrserver.CustomHandleConn = YourCustomHandleConn in init func?")
+	}
 )
 
 type TCPServer struct {
@@ -33,15 +35,14 @@ func CreateTCPServer(inf string, port int) (error, *TCPServer) {
 }
 
 func (s *TCPServer) Start() {
-	fmt.Printf("Server listening in [%s]\n", s.ls.Addr())
+	logs.Info("Server listening in [%s]", s.ls.Addr())
 	for {
 		conn, err := s.ls.Accept()
 		if err != nil {
-			fmt.Println("Server Accept() return error, %s", err)
+			logs.Error("Server Accept() return error, %s", err)
 			break
 		}
-		fmt.Printf("new msg [%s]-->[%s]\n", conn.RemoteAddr(), conn.LocalAddr())
-		go s.handleConn(NewTCPConnection(conn)) 
+		go s.handleConn(NewTCPConnection(conn))
 	}
 	return
 }
@@ -52,12 +53,9 @@ func (s *TCPServer) handleConn(c *TCPConnection) {
 		if err != nil {
 			// end goroutine
 			if err != io.EOF {
-				fmt.Println(err)
-				return
-			}else{
-				fmt.Println("EOF")
-				return
+				logs.Error("Error occurred when read packet, %s", err)
 			}
+			return
 		}
 		go CustomHandleConn(c, packet)
 	}

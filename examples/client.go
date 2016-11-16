@@ -1,36 +1,52 @@
 package main
 
 import (
-	"fmt"
+	"./proto/rrfp"
+	"github.com/golang/protobuf/proto"
 	"net"
+	"rrframework/logs"
 	"rrframework/server"
 	"rrframework/utils"
-	"rrframework/examples/proto/example"
-	"./proto/rrfp"
-	"rrframework/serializer/protobuf/proto"
 )
 
 func main() {
-	conn, err := net.Dial("tcp", "10.19.147.75:8003")
+	conn, err := net.Dial("tcp", "0.0.0.0:8003")
 	if err != nil {
-		fmt.Println(err)
+		logs.Error(err)
 		return
 	}
 	c := rrserver.NewTCPConnection(conn)
-	fmt.Println(c)
+
 	msg := new(rrfp.Message)
 	msg.Hd = &rrfp.Head{
-		rrutils.NewV4().String(),	
-		"example.EchoRequest",
+		rrutils.NewV4().String(),
+		"rrfp.ExampleEchoRequest",
 	}
 	msg.By = &rrfp.Body{
-		&rrfp.Body_ExampleEchoRequest{
-			&example.EchoRequest{
-				"fuck you man",
-			},
+		MsgType: &rrfp.Body_ExampleEchoRequest{
+			ExampleEchoRequest: &rrfp.ExampleEchoRequest{Msg: "hello world!"},
 		},
 	}
-	b, _ := proto.Marshal(msg)
-	c.Write(b)
+	logs.Debug("before marshal:", msg)
+	b, err := proto.Marshal(msg)
+	if err != nil {
+		logs.Error(err)
+		return
+	}
+
+	if err := c.Write(b); err != nil {
+		logs.Error(err)
+		return
+	}
+
+	err, packet := c.Read()
+	if err != nil {
+		logs.Error(err)
+		return
+	}
+	m := new(rrfp.Message)
+	proto.Unmarshal(packet, m)
+	logs.Info(m.String())
+	logs.Debug("Response msg", m.GetBy().GetExampleEchoResponse().Msg)
 
 }
