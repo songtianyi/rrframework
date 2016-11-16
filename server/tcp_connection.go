@@ -17,17 +17,23 @@ type TCPConnection struct {
 	w    io.Writer
 }
 
-func NewTCPConnection(conn net.Conn) (*TCPConnection) {
+func NewTCPConnection(conn net.Conn) *TCPConnection {
 	return &TCPConnection{
 		conn: conn,
-		r: conn,
-		w: conn,
+		r:    conn,
+		w:    conn,
 	}
-
 }
 
-func (c *TCPConnection) setKeepAlive(v bool) error {
+func (c *TCPConnection) SetKeepAlive(v bool) error {
 	return c.conn.(*net.TCPConn).SetKeepAlive(v)
+}
+
+func (c *TCPConnection) RemoteAddr() string {
+	return c.conn.RemoteAddr().String()
+}
+func (c *TCPConnection) LocalAddr() string {
+	return c.conn.LocalAddr().String()
 }
 
 func (c *TCPConnection) Read() (error, []byte) {

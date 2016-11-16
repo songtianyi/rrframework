@@ -4,17 +4,16 @@ import (
 	"time"
 )
 
-// for request & response
+// handler for requests
+type Handler func(interface{}, interface{})
 
-type HandlerFuncWrapper func(interface{}, interface{})
-
-type Handler struct { 
-	wrapper HandlerFuncWrapper
+type HandlerWrapper struct {
+	handle  Handler
 	timeout time.Duration
 }
 
-func (h Handler) Run(c interface{}, msg interface{}) {
-	h.wrapper(c, msg)
+func (h HandlerWrapper) Run(c interface{}, msg interface{}) {
+	h.handle(c, msg)
 }
 
-// for timer
+// handler for timer jobs

@@ -1,12 +1,9 @@
 syntax = "proto3";
 package rrfp;
-//import "any.proto";
-import "example.proto";
-
 
 message Message {
-	Head hd = 1;
-	Body by	= 2;
+	Head hd = 10;
+	Body by	= 20;
 }
 
 message Head {
@@ -16,8 +13,15 @@ message Head {
 
 message Body {
 	oneof msgType {
-		example.EchoRequest example_echo_request = 10;
-		example.EchoResponse example_echo_response = 20;
+		ExampleEchoRequest example_echo_request = 10;
+		ExampleEchoResponse example_echo_response = 20;
 	}
+}
+
+message ExampleEchoRequest {
+	string msg = 10;
+}
+message ExampleEchoResponse {
+	string msg = 10;
 }
 

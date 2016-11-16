@@ -1,22 +1,24 @@
 package rrserver
 
 import (
-	"fmt"
 	"io"
 	"net"
-	"rrframework/handler"
-	"rrframework/examples/proto/rrfp"
-	"rrframework/serializer/protobuf/proto"
+	"rrframework/logs"
 	"strconv"
+)
+
+var (
+	CustomHandleConn = func(c *TCPConnection, packet []byte) {
+		logs.Warn("forget rrserver.CustomHandleConn = YourCustomHandleConn in init func?")
+	}
 )
 
 type TCPServer struct {
 	ls   net.Listener
 	port int
-	hr   *rrhandler.HandleRegister
 }
 
-func CreateTCPServer(inf string, port int, hr *rrhandler.HandleRegister) (error, *TCPServer) {
+func CreateTCPServer(inf string, port int) (error, *TCPServer) {
 	err, ipaddr := getIpAddrByInterface(inf)
 	if err != nil {
 		return err, nil
@@ -28,21 +30,19 @@ func CreateTCPServer(inf string, port int, hr *rrhandler.HandleRegister) (error,
 	s := &TCPServer{
 		ls:   listener,
 		port: port,
-		hr:   hr,
 	}
 	return nil, s
 }
 
 func (s *TCPServer) Start() {
-	fmt.Printf("Server listening in [%s]\n", s.ls.Addr())
+	logs.Info("Server listening in [%s]", s.ls.Addr())
 	for {
 		conn, err := s.ls.Accept()
 		if err != nil {
-			fmt.Println("Server Accept() return error, %s", err)
+			logs.Error("Server Accept() return error, %s", err)
 			break
 		}
-		fmt.Printf("new msg [%s]-->[%s]\n", conn.RemoteAddr(), conn.LocalAddr())
-		go s.handleConn(NewTCPConnection(conn)) 
+		go s.handleConn(NewTCPConnection(conn))
 	}
 	return
 }
@@ -50,28 +50,13 @@ func (s *TCPServer) Start() {
 func (s *TCPServer) handleConn(c *TCPConnection) {
 	for {
 		err, packet := c.Read()
-		defer c.conn.Close()
 		if err != nil {
+			// end goroutine
 			if err != io.EOF {
-				fmt.Println(err)
-				return
-			}else{
-				return
+				logs.Error("Error occurred when read packet, %s", err)
 			}
+			return
 		}
-		msg := new(rrfp.Message)
-		err = proto.Unmarshal(packet, msg)
-		fmt.Println("got message")
-		if err != nil {
-			fmt.Sprintf("Unmarshal packet err, %s", err)
-			continue
-		}
-		err, handle := s.hr.Get(msg.GetHd().UniqueId)
-		fmt.Println(handle)
-		if err != nil {
-			fmt.Println("handle for 1 not registred")
-			continue
-		}
-		go handle.(rrhandler.Handler).Run(c, msg)
+		go CustomHandleConn(c, packet)
 	}
 }
