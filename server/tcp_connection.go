@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"io"
 	"net"
+	"sync"
 )
 
 var (
@@ -12,9 +13,11 @@ var (
 )
 
 type TCPConnection struct {
-	conn net.Conn
-	r    io.Reader
-	w    io.Writer
+	conn  net.Conn
+	r     io.Reader
+	w     io.Writer
+	rLock sync.Mutex
+	wLock sync.Mutex
 }
 
 func NewTCPConnection(conn net.Conn) *TCPConnection {
@@ -37,6 +40,8 @@ func (c *TCPConnection) LocalAddr() string {
 }
 
 func (c *TCPConnection) Read() (error, []byte) {
+	c.rLock.Lock()
+	defer c.rLock.Unlock()
 	buf := make([]byte, PT_SIZE)
 	if _, err := io.ReadFull(c.r, buf[:PT_SIZE_BYTE_LEN]); err != nil {
 		return err, buf
@@ -52,6 +57,8 @@ func (c *TCPConnection) Read() (error, []byte) {
 }
 
 func (c *TCPConnection) Write(msg []byte) error {
+	c.wLock.Lock()
+	defer c.wLock.Unlock()
 	buf := make([]byte, PT_SIZE_BYTE_LEN)
 	binary.BigEndian.PutUint32(buf[:PT_SIZE_BYTE_LEN], uint32(len(msg)))
 	if _, err := c.w.Write(buf[:PT_SIZE_BYTE_LEN]); err != nil {
