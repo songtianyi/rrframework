@@ -5,15 +5,15 @@ import (
 )
 
 // handler for requests
-type Handler func(interface{}, chan []byte)
+type Handler func(interface{}, interface{})
 
 type HandlerWrapper struct {
 	handle  Handler
 	timeout time.Duration
 }
 
-func (h HandlerWrapper) Run(req interface{}, res chan []byte) {
-	h.handle(req, res)
+func (h HandlerWrapper) Run(c interface{}, msg interface{}) {
+	h.handle(c, msg)
 }
 
 // handler for timer jobs
