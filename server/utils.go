@@ -42,5 +42,5 @@ func getIpAddrByInterface(inf string) (error, string) {
 			return errors.New(fmt.Sprintf("Ip protocol [%s] not support", IP_PROTOCOL)), inf
 		}
 	}
-	return errors.New(fmt.Sprintf("Failed when try get ip address, input is [%s]", inf)), inf
+	return errors.New(fmt.Sprintf("Failed when try to get ip address, [%s]", inf)), inf
 }
