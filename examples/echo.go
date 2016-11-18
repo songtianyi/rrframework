@@ -1,8 +1,9 @@
 package main
 
 import (
-	"./proto/rrfp"
 	"github.com/golang/protobuf/proto"
+	"rrframework/connector/redis"
+	"rrframework/examples/proto/rrfp"
 	"rrframework/handler"
 	"rrframework/logs"
 	"rrframework/server"
@@ -19,18 +20,32 @@ func echo(c interface{}, msg interface{}) {
 	m := msg.(*rrfp.Message)
 	logs.Debug("Request msg:", m.GetBy().GetExampleEchoRequest().Msg)
 
-	req := new(rrfp.Message)
-	req.Hd = &rrfp.Head{
+	res := new(rrfp.Message)
+	res.Hd = &rrfp.Head{
 		rrutils.NewV4().String(),
 		"rrfp.ExampleEchoResponse",
 	}
-	req.By = &rrfp.Body{
+	res.By = &rrfp.Body{
 		MsgType: &rrfp.Body_ExampleEchoResponse{
 			ExampleEchoResponse: &rrfp.ExampleEchoResponse{Msg: "Lucky!"},
 		},
 	}
-	b, _ := proto.Marshal(req)
 
+	// connect redis, set msg to db
+	rc, err := rrredis.GetRedisClient("127.0.0.1:6379")
+	if err != nil {
+		logs.Error(err)
+	} else {
+		result, err := rc.Get("songtianyi")
+		if err != nil {
+			logs.Debug(err)
+			res.GetBy().GetExampleEchoResponse().Msg = err.Error()
+		} else {
+			res.GetBy().GetExampleEchoResponse().Msg = string(result)
+		}
+	}
+
+	b, _ := proto.Marshal(res)
 	if err := conn.Write(b); err != nil {
 		logs.Error(err)
 		return

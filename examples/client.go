@@ -1,9 +1,9 @@
 package main
 
 import (
-	"./proto/rrfp"
 	"github.com/golang/protobuf/proto"
 	"net"
+	"rrframework/examples/proto/rrfp"
 	"rrframework/logs"
 	"rrframework/server"
 	"rrframework/utils"
