@@ -28,6 +28,10 @@ func NewTCPConnection(conn net.Conn) *TCPConnection {
 	}
 }
 
+func (c *TCPConnection) Close() error {
+	return c.conn.Close()
+}
+
 func (c *TCPConnection) SetKeepAlive(v bool) error {
 	return c.conn.(*net.TCPConn).SetKeepAlive(v)
 }
