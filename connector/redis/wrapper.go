@@ -14,30 +14,26 @@ type RedisOptions struct {
 	connPoolSize int
 }
 
-type RedisClient struct {
-	c *redis.Client
-}
-
 var (
-	cp              = &clientPool{m: make(map[string]*redis.Client)}
+	cp              = &clientPool{pool: make(map[string]*redis.Client)}
 	defaultPoolSize = 500
 )
 
 type clientPool struct {
-	m  map[string]*redis.Client
-	mu sync.RWMutex
+	pool map[string]*redis.Client
+	mu   sync.RWMutex
 }
 
 func (s *clientPool) add(addr string, rc *redis.Client) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.m[addr] = rc
+	s.pool[addr] = rc
 }
 
 func (s *clientPool) get(addr string) *redis.Client {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
-	if v, ok := s.m[addr]; ok {
+	if v, ok := s.pool[addr]; ok {
 		return v
 	}
 	return nil
@@ -67,9 +63,9 @@ func Connect(addr string, opt *RedisOptions) error {
 }
 
 // get redis client before you want to do some operations
-func GetRedisClient(addr string) (*RedisClient, error) {
+func GetRedisClient(addr string) (error, *RedisClient) {
 	if c := cp.get(addr); c != nil {
-		return &RedisClient{c: c}, nil
+		return nil, &RedisClient{c: c}
 	}
 	err := Connect(addr, &RedisOptions{
 		db:           0,
@@ -78,9 +74,13 @@ func GetRedisClient(addr string) (*RedisClient, error) {
 		password:     "",
 	})
 	if err != nil {
-		return nil, fmt.Errorf("Couldn't find redis client for [%s], failed when try to get a new one, %s", addr, err)
+		return fmt.Errorf("Couldn't find redis client for [%s], failed when try to get a new one, %s", addr, err), nil
 	}
 	return GetRedisClient(addr)
+}
+
+type RedisClient struct {
+	c *redis.Client
 }
 
 // list of redis operations

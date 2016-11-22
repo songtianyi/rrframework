@@ -9,3 +9,4 @@
  		 commit: b6bfe529a846fbb9a58c832ce71c61b6fde12c15
 * go get github.com/golang/protobuf/proto  
          commit: 8ee79997227bf9b34611aee7946ae64735e6fd93
+* go get github.com/samuel/go-zookeeper/zk
