@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-var (
+const (
 	PT_SIZE          = uint32(512) // packet len in byte
 	PT_SIZE_BYTE_LEN = 4           // packet len value in bits
 )

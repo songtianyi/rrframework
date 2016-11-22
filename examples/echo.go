@@ -15,6 +15,18 @@ var (
 	hr *rrhandler.HandlerRegister
 )
 
+func joke(msg interface{}) {
+	logs.Debug("joke")
+	m := msg.(*rrfp.Message)
+	b, err := proto.Marshal(m)
+	if err != nil {
+		logs.Error(err)
+	}
+	// send the same msg to itself
+	err, newRes := rrserver.SendTCPRequest("127.0.0.1:8003", b)
+	logs.Debug(err, newRes)
+}
+
 func echo(c interface{}, msg interface{}) {
 	conn := c.(*rrserver.TCPConnection)
 	m := msg.(*rrfp.Message)
@@ -50,6 +62,8 @@ func echo(c interface{}, msg interface{}) {
 		logs.Error(err)
 		return
 	}
+
+	joke(msg)
 	return
 }
 

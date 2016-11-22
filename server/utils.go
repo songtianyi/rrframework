@@ -1,18 +1,42 @@
 package rrserver
 
 import (
-	"errors"
 	"fmt"
 	"net"
 )
 
-var (
-	IP_PROTOCOL = "ipv4"
+const (
+	IP_PROTOCOL     = "ipv4"
+	defaultPoolSize = 10
 )
+
+var (
+	cp *TCPConnectionPool
+)
+
+func init() {
+	cp = CreateTCPConnectionPool(defaultPoolSize)
+}
+
+func SendTCPRequest(addr string, msg []byte) (error, []byte) {
+	err, c := cp.Get(addr)
+	if err != nil {
+		return err, nil
+	}
+	if err := c.SetKeepAlive(true); err != nil {
+		return err, nil
+	}
+	if err := c.Write(msg); err != nil {
+		return err, nil
+	}
+	err, b := c.Read()
+	cp.Add(addr, c)
+	return err, b
+}
 
 func getIpAddrByInterface(inf string) (error, string) {
 	if len(inf) < 1 {
-		return errors.New("Interface name is an empty string!"), inf
+		return fmt.Errorf("Interface name is an empty string!"), inf
 	}
 	if net.ParseIP(inf) != nil {
 		return nil, inf
@@ -39,8 +63,8 @@ func getIpAddrByInterface(inf string) (error, string) {
 				return nil, ipHandle.To16().String()
 			}
 		} else {
-			return errors.New(fmt.Sprintf("Ip protocol [%s] not support", IP_PROTOCOL)), inf
+			return fmt.Errorf("Ip protocol [%s] not support", IP_PROTOCOL), inf
 		}
 	}
-	return errors.New(fmt.Sprintf("Failed when try to get ip address, [%s]", inf)), inf
+	return fmt.Errorf("Failed when try to get ip address, [%s]", inf), inf
 }
