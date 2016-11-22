@@ -64,11 +64,11 @@ func echo(c interface{}, msg interface{}) {
 		return
 	}
 
-	//joke(msg)
 	err, _ = rrzk.GetZkClient("10.19.150.38:2181,10.19.168.143:2181,10.19.3.141:2181")
 	if err != nil {
 		logs.Error(err)
 	}
+	//joke(msg)
 	return
 }
 
@@ -102,5 +102,6 @@ func main() {
 		logs.Debug(err)
 		return
 	}
+	rrutils.StartProfiling()
 	s.Start()
 }
