@@ -1,22 +1,26 @@
 package rrhandler
 
 import (
-	"errors"
 	"fmt"
+	"sync"
 	"time"
 )
 
 type HandlerRegister struct {
+	mu   *sync.RWMutex
 	hmap map[string]*HandlerWrapper
 }
 
 func CreateHandlerRegister() (error, *HandlerRegister) {
 	return nil, &HandlerRegister{
+		mu:   new(sync.RWMutex),
 		hmap: make(map[string]*HandlerWrapper),
 	}
 }
 
 func (hr *HandlerRegister) Add(key string, h Handler, t time.Duration) {
+	hr.mu.Lock()
+	defer hr.mu.Unlock()
 	hr.hmap[key] = &HandlerWrapper{
 		handle:  h,
 		timeout: t,
@@ -24,9 +28,10 @@ func (hr *HandlerRegister) Add(key string, h Handler, t time.Duration) {
 }
 
 func (hr *HandlerRegister) Get(key string) (error, *HandlerWrapper) {
-	if _, ok := hr.hmap[key]; !ok {
-		//return errors.New(fmt.Sprintf("value for key [%d] not exist in map", key)), HandlerWrapper{handle: nil, timeout: 0 * time.Second}
-		return errors.New(fmt.Sprintf("value for key [%d] not exist in map", key)), nil
+	hr.mu.RLock()
+	defer hr.mu.RUnlock()
+	if v, ok := hr.hmap[key]; ok {
+		return nil, v
 	}
-	return nil, hr.hmap[key]
+	return fmt.Errorf("value for key [%d] does not exist in map", key), nil
 }

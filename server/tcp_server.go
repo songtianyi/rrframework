@@ -57,6 +57,8 @@ func (s *TCPServer) handleConn(c *TCPConnection) {
 			}
 			return
 		}
+		// Maybe thousands of packet coming in the same time
+		// So lock for connection is necessary
 		go CustomHandleConn(c, packet)
 	}
 }

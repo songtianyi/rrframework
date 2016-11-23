@@ -1,36 +1,51 @@
 package rrserver
 
-import ()
-
-type TCPConnectionPool struct {
-	pool map[string]*TCPConnection
-}
-
-var (
-	connPool = new(TCPConnectionPool)
+import (
+	"fmt"
+	"sync"
 )
 
-func (s *TCPConnectionPool) Add(key string, c *TCPConnection) {
-	s.pool[key] = c
+type TCPConnectionPool struct {
+	pool     map[string]*channelPool
+	mu       sync.RWMutex
+	poolSize int
 }
 
-func (s *TCPConnectionPool) Del(key string) error {
-	if _, ok := s.pool[key]; !ok {
-		return nil
+func CreateTCPConnectionPool(poolSize int) *TCPConnectionPool {
+	return &TCPConnectionPool{
+		pool:     make(map[string]*channelPool),
+		poolSize: 10,
 	}
-	if err := s.pool[key].conn.Close(); err != nil {
-		return err
-	}
-	delete(s.pool, key)
-	return nil
 }
 
-func (s *TCPConnectionPool) Get(key string) *TCPConnection {
-	if _, ok := s.pool[key]; !ok {
-		return nil
+func (s *TCPConnectionPool) Get(addr string) (error, *TCPConnection) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.pool[addr]; !ok {
+		// first ever
+		s.pool[addr] = &channelPool{
+			conns: make(chan *TCPConnection, s.poolSize),
+		}
 	}
-	return s.pool[key]
+	return s.pool[addr].get(addr)
 }
 
-func (s *TCPConnectionPool) CloseAll(key string) {
+func (s *TCPConnectionPool) Add(addr string, c *TCPConnection) error {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	if _, ok := s.pool[addr]; !ok {
+		return fmt.Errorf("the connection you passed may not belonged to me")
+	}
+	return s.pool[addr].add(c)
+}
+
+func (s *TCPConnectionPool) CloseAll(addr string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.pool[addr]; !ok {
+		return
+	}
+	s.pool[addr].closePool()
+	delete(s.pool, addr)
+	return
 }

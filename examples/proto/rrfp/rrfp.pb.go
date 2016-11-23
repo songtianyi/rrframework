@@ -66,6 +66,20 @@ func (m *Head) String() string            { return proto.CompactTextString(m) }
 func (*Head) ProtoMessage()               {}
 func (*Head) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
+func (m *Head) GetSesionNo() string {
+	if m != nil {
+		return m.SesionNo
+	}
+	return ""
+}
+
+func (m *Head) GetUniqueId() string {
+	if m != nil {
+		return m.UniqueId
+	}
+	return ""
+}
+
 type Body struct {
 	// Types that are valid to be assigned to MsgType:
 	//	*Body_ExampleEchoRequest
@@ -196,6 +210,13 @@ func (m *ExampleEchoRequest) String() string            { return proto.CompactTe
 func (*ExampleEchoRequest) ProtoMessage()               {}
 func (*ExampleEchoRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
+func (m *ExampleEchoRequest) GetMsg() string {
+	if m != nil {
+		return m.Msg
+	}
+	return ""
+}
+
 type ExampleEchoResponse struct {
 	Msg string `protobuf:"bytes,10,opt,name=msg" json:"msg,omitempty"`
 }
@@ -204,6 +225,13 @@ func (m *ExampleEchoResponse) Reset()                    { *m = ExampleEchoRespo
 func (m *ExampleEchoResponse) String() string            { return proto.CompactTextString(m) }
 func (*ExampleEchoResponse) ProtoMessage()               {}
 func (*ExampleEchoResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+
+func (m *ExampleEchoResponse) GetMsg() string {
+	if m != nil {
+		return m.Msg
+	}
+	return ""
+}
 
 func init() {
 	proto.RegisterType((*Message)(nil), "rrfp.Message")
