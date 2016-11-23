@@ -44,7 +44,7 @@ func echo(c interface{}, msg interface{}) {
 		},
 	}
 
-	// connect redis, set msg to db
+	// connect redis
 	err, rc := rrredis.GetRedisClient("127.0.0.1:6379")
 	if err != nil {
 		logs.Error(err)
@@ -64,8 +64,7 @@ func echo(c interface{}, msg interface{}) {
 		return
 	}
 
-	err, _ = rrzk.GetZkClient("10.19.150.38:2181,10.19.168.143:2181,10.19.3.141:2181")
-	if err != nil {
+	if err, _ = rrzk.GetZkClient("10.19.150.38:2181,10.19.168.143:2181,10.19.3.141:2181"); err != nil {
 		logs.Error(err)
 	}
 	//joke(msg)

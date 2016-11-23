@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	IP_PROTOCOL     = "ipv4"
-	defaultPoolSize = 10
+	IP_PROTOCOL       = "ipv4"
+	DEFAULT_POOL_SIZE = 10
 )
 
 var (
@@ -15,7 +15,7 @@ var (
 )
 
 func init() {
-	cp = CreateTCPConnectionPool(defaultPoolSize)
+	cp = CreateTCPConnectionPool(DEFAULT_POOL_SIZE)
 }
 
 func SendTCPRequest(addr string, msg []byte) (error, []byte) {
