@@ -3,7 +3,7 @@ package rrzk
 import (
 	"fmt"
 	"github.com/samuel/go-zookeeper/zk"
-	"rrframework/logs"
+	"github.com/songtianyi/rrframework/logs"
 	"strings"
 	"sync"
 	"time"

@@ -1,9 +1,9 @@
 package rrutils
 
 import (
+	"github.com/songtianyi/rrframework/logs"
 	"net/http"
 	_ "net/http/pprof"
-	"rrframework/logs"
 )
 
 func StartProfiling() {
