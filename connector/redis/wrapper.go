@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+var (
+	Nil = redis.Nil
+)
+
 type RedisOptions struct {
 	dialTimeout  time.Duration
 	db           int
@@ -39,7 +43,7 @@ func (s *clientPool) get(addr string) *redis.Client {
 	return nil
 }
 
-// connect once when program start if you wanna customize redis options
+// if you wanna customize redis options, connect once when program start
 func Connect(addr string, opt *RedisOptions) error {
 	if addr == "" || opt == nil {
 		return fmt.Errorf("Redis addr empty or options nil")
@@ -100,9 +104,9 @@ func (c *RedisClient) HMDelete(key string, fields ...string) error {
 	return status.Err()
 }
 
-func (c *RedisClient) HMExists(key, field string) error {
+func (c *RedisClient) HMExists(key, field string) (bool, error) {
 	status := c.c.HExists(key, field)
-	return status.Err()
+	return status.Result()
 }
 
 func (c *RedisClient) Exists(key string) bool {
