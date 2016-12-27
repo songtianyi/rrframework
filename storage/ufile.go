@@ -201,7 +201,7 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 			go func(j int) {
 				defer wg.Done()
 				part := content[j*initRes.BlkSize : (j+1)*initRes.BlkSize]
-				_, etag, err := s.uploadPart(part, initRes, i)
+				_, etag, err := s.uploadPart(part, initRes, j)
 				if err != nil {
 					errChan <- err
 					return
