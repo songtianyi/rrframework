@@ -23,7 +23,9 @@ type UfileStorage struct {
 const (
 	EXPIRE       = 3600
 	SUFFIX       = ".ufile.ucloud.cn"
-	MAX_PUT_SIZE = 52428800
+	MAX_PUT_SIZE = 50 * (1 << 20)
+	MAX_GET_SIZE = 50 * (1 << 20)
+	PARTIAL_SIZE = 4 * (1 << 20)
 )
 
 func CreateUfileStorage(pub, pri, bun string) StorageWrapper {
@@ -209,7 +211,7 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 				etags = append(etags, etag)
 			}(i)
 		}
-		// TODO currency limit
+		// TODO concurrency limit
 		// TODO capture error
 		wg.Wait()
 		if num*initRes.BlkSize < size {
@@ -232,10 +234,110 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 	return nil
 }
 
-func (s *UfileStorage) Alt(info string) {
-	fmt.Println("")
+type fileItem struct {
+	BucketName string
+	FileName   string
+	Hash       string
+	MimeType   string
+	Size       int
+	CreateTime int
+	ModifyTime int
 }
 
-func (s *UfileStorage) Fetch() ([]byte, error) {
-	return nil, nil
+type fileList struct {
+	BucketName string
+	BucketId   string
+	NextMarker string
+	DataSet    []fileItem
+}
+
+func (s *UfileStorage) PrefixFileList(prefix string) (*fileList, error) {
+	// sign
+	sign := s.signheader("GET", "", s.BucketName, "")
+	auth := "UCloud" + " " + s.PublicKey + ":" + sign
+	client := &http.Client{}
+	url := "http://" + s.BucketName + SUFFIX + "/?list&prefix=" + prefix
+	req, err := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Authorization", auth)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("PrefixFileList failed, %s", string(body))
+	}
+	var res fileList
+	if err := json.Unmarshal(body, &res); err != nil {
+		return nil, err
+	}
+	return &res, nil
+}
+
+func (s *UfileStorage) getFile(filename, brange string) ([]byte, int, error) {
+	// sign
+	sign := s.signheader("GET", "", s.BucketName, filename)
+	auth := "UCloud" + " " + s.PublicKey + ":" + sign
+	client := &http.Client{}
+	url := "http://" + s.BucketName + SUFFIX + "/" + filename
+	req, err := http.NewRequest("GET", url, nil)
+
+	req.Header.Add("Authorization", auth)
+	req.Header.Add("Range", brange)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, 0, err
+	}
+	fmt.Println(resp)
+	body, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	if err != nil {
+		return nil, 0, err
+	}
+	if resp.StatusCode != 206 && resp.StatusCode != 200 {
+		return nil, 0, fmt.Errorf("getFile failed, %s", string(body))
+	}
+	size := 0
+	if resp.StatusCode == 200 {
+		// complete
+		size, _ = strconv.Atoi(resp.Header.Get("Content-Length"))
+	} else if resp.StatusCode == 206 {
+		// partial
+		size, _ = strconv.Atoi(strings.Split(resp.Header.Get("Content-Range"), "/")[1])
+	}
+	return body, size, nil
+}
+
+func (s *UfileStorage) Fetch(filename string) ([]byte, error) {
+	b, size, err := s.getFile(filename, "bytes=0-"+strconv.Itoa(MAX_GET_SIZE-1))
+	if err != nil {
+		return b, err
+	}
+	lb := len(b)
+	if lb == size {
+		// downloaded
+		return b, nil
+	}
+	fmt.Println(lb)
+	// partial
+	size -= lb
+	num := size / PARTIAL_SIZE
+	for i := 0; i <= num; i++ {
+		brange := "bytes="
+		brange += strconv.Itoa(i*PARTIAL_SIZE+lb) + "-"
+		brange += strconv.Itoa((i+1)*PARTIAL_SIZE + lb - 1)
+		bp, _, err := s.getFile(filename, brange)
+		if err != nil {
+			continue
+		}
+		b = append(b, bp...)
+	}
+	return b, nil
 }
