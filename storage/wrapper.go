@@ -1,4 +1,4 @@
-package storage
+package rrstorage
 
 // Gerneral storage wrapper
 type StorageWrapper interface {

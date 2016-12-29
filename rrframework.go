@@ -12,7 +12,7 @@ type framework struct {
 var (
 	Framework = &framework{
 		ver:   "0.1",
-		gover: "1.5",
+		gover: "1.5+",
 	}
 )
 

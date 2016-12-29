@@ -1,11 +1,13 @@
-package storage
+package rrstorage
 
 import (
 	"bytes"
+	"github.com/cheggaaa/pb"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
+	"github.com/songtianyi/rrframework/logs"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -195,8 +197,8 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 			return err
 		}
 		num := size / initRes.BlkSize
+		bar := pb.StartNew(num+1)
 		etags := make([]string, 0)
-		errChan := make(chan error, 1)
 		var wg sync.WaitGroup
 		for i := 0; i < num; i++ {
 			wg.Add(1)
@@ -205,10 +207,11 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 				part := content[j*initRes.BlkSize : (j+1)*initRes.BlkSize]
 				_, etag, err := s.uploadPart(part, initRes, j)
 				if err != nil {
-					errChan <- err
+					logs.Error(err)
 					return
 				}
 				etags = append(etags, etag)
+				bar.Increment()
 			}(i)
 		}
 		// TODO concurrency limit
@@ -222,11 +225,13 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 				return err
 			}
 			etags = append(etags, etag)
+			bar.Increment()
 		}
 		_, err = s.finishMultipartUpload(initRes, strings.Join(etags, ","))
 		if err != nil {
 			return err
 		}
+		bar.Finish()
 
 	} else {
 		return s.put(content, filename)
@@ -295,7 +300,6 @@ func (s *UfileStorage) getFile(filename, brange string) ([]byte, int, error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	fmt.Println(resp)
 	body, err := ioutil.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
@@ -325,19 +329,23 @@ func (s *UfileStorage) Fetch(filename string) ([]byte, error) {
 		// downloaded
 		return b, nil
 	}
-	fmt.Println(lb)
 	// partial
 	size -= lb
 	num := size / PARTIAL_SIZE
+	bar := pb.StartNew(num+1)
+	// TODO concurrency
 	for i := 0; i <= num; i++ {
 		brange := "bytes="
 		brange += strconv.Itoa(i*PARTIAL_SIZE+lb) + "-"
 		brange += strconv.Itoa((i+1)*PARTIAL_SIZE + lb - 1)
 		bp, _, err := s.getFile(filename, brange)
 		if err != nil {
+			logs.Error(err)
 			continue
 		}
 		b = append(b, bp...)
+		bar.Increment()
 	}
+	bar.Finish()
 	return b, nil
 }
