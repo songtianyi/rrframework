@@ -20,6 +20,8 @@ type UfileStorage struct {
 	PublicKey  string
 	PrivateKey string
 	BucketName string
+
+	usema chan struct{}	// uploading concurrency limit
 }
 
 const (
@@ -30,11 +32,12 @@ const (
 	PARTIAL_SIZE = 4 * (1 << 20)
 )
 
-func CreateUfileStorage(pub, pri, bun string) StorageWrapper {
+func CreateUfileStorage(pub, pri, bun string, ucl int) StorageWrapper {
 	s := &UfileStorage{
 		PublicKey:  pub,
 		PrivateKey: pri,
 		BucketName: bun,
+		usema: make(chan struct{}, ucl),
 	}
 	return s
 }
@@ -201,9 +204,13 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 		etags := make([]string, 0)
 		var wg sync.WaitGroup
 		for i := 0; i < num; i++ {
+			s.usema <- struct{}{}
 			wg.Add(1)
 			go func(j int) {
-				defer wg.Done()
+				defer func() {
+					wg.Done()
+					<-s.usema
+				}()
 				part := content[j*initRes.BlkSize : (j+1)*initRes.BlkSize]
 				_, etag, err := s.uploadPart(part, initRes, j)
 				if err != nil {
@@ -214,7 +221,6 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 				bar.Increment()
 			}(i)
 		}
-		// TODO concurrency limit
 		// TODO capture error
 		wg.Wait()
 		if num*initRes.BlkSize < size {
