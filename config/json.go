@@ -83,3 +83,14 @@ func (s *JsonConfig) GetStringSlice(key string) ([]string, error) {
 	}
 	return ss, nil
 }
+
+func (s *JsonConfig) GetString(key string)(string, error) {
+	f, err := s.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := f.(string); !ok {
+		return nil, fmt.Errorf("value for key %s is not string", key)
+	}
+	return f.(string), nil
+}
