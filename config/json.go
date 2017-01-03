@@ -14,11 +14,16 @@ type JsonConfig struct {
 	mu    sync.RWMutex
 }
 
-func LoadConfigFromFile(path string) (*JsonConfig, error) {
+func LoadJsonConfigFromFile(path string) (*JsonConfig, error) {
 	b, err := ioutil.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
+	return LoadJsonConfigFromBytes(b)
+}
+
+
+func LoadJsonConfigFromBytes(b [] byte) (*JsonConfig, error) {
 	var jm map[string]interface{}
 	if err := json.Unmarshal(b, &jm); err != nil {
 		return nil, err
