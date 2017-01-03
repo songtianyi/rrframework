@@ -202,7 +202,10 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 		num := size / initRes.BlkSize
 		bar := pb.StartNew(num+1)
 		etags := make([]string, 0)
-		var wg sync.WaitGroup
+		var (
+			wg sync.WaitGroup
+			em sync.Mutex
+		)
 		for i := 0; i < num; i++ {
 			s.usema <- struct{}{}
 			wg.Add(1)
@@ -217,8 +220,10 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 					logs.Error(err)
 					return
 				}
+				em.Lock()
 				etags = append(etags, etag)
 				bar.Increment()
+				em.Unlock()
 			}(i)
 		}
 		// TODO capture error
