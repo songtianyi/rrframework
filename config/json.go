@@ -1,6 +1,7 @@
 package rrconfig
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -11,6 +12,7 @@ import (
 type JsonConfig struct {
 	m     map[string]interface{}
 	cache map[string]interface{}
+	rb    []byte
 	mu    sync.RWMutex
 }
 
@@ -22,8 +24,7 @@ func LoadJsonConfigFromFile(path string) (*JsonConfig, error) {
 	return LoadJsonConfigFromBytes(b)
 }
 
-
-func LoadJsonConfigFromBytes(b [] byte) (*JsonConfig, error) {
+func LoadJsonConfigFromBytes(b []byte) (*JsonConfig, error) {
 	var jm map[string]interface{}
 	if err := json.Unmarshal(b, &jm); err != nil {
 		return nil, err
@@ -31,8 +32,17 @@ func LoadJsonConfigFromBytes(b [] byte) (*JsonConfig, error) {
 	s := &JsonConfig{
 		m:     jm,
 		cache: make(map[string]interface{}),
+		rb:    b,
 	}
 	return s, nil
+}
+
+func (s *JsonConfig) Dump() (string, error) {
+	var rj bytes.Buffer
+	if err := json.Indent(&rj, s.rb, "", "\t"); err != nil {
+		return "", err
+	}
+	return string(rj.Bytes()), nil
 }
 
 // Get("a.b.c")
@@ -77,14 +87,14 @@ func (s *JsonConfig) GetStringSlice(key string) ([]string, error) {
 	for i, v := range sf {
 		if vv, ok := v.(string); ok {
 			ss[i] = vv
-		}else{
+		} else {
 			return nil, fmt.Errorf("%s[%d] is not a string", key, i)
 		}
 	}
 	return ss, nil
 }
 
-func (s *JsonConfig) GetString(key string)(string, error) {
+func (s *JsonConfig) GetString(key string) (string, error) {
 	f, err := s.Get(key)
 	if err != nil {
 		return "", err
