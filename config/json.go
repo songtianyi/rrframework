@@ -104,3 +104,15 @@ func (s *JsonConfig) GetString(key string) (string, error) {
 	}
 	return f.(string), nil
 }
+
+func (s *JsonConfig) GetFloat64(key string) (float64, error) {
+	f, err := s.Get(key)
+	if err != nil {
+		return 0.0, err
+	}
+	if _, ok := f.(float64); !ok {
+		return 0.0, fmt.Errorf("value for key %s is not float64", key)
+	}
+	return f.(float64), nil
+}
+
