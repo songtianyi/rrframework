@@ -29,7 +29,7 @@ var (
 
 func init() {
 	// TODO
-	// set zk logger with rrframework/logs
+	// set zk logger to rrframework/logs
 }
 
 func (s *clientPool) add(sv string, c *ZKClient) {
