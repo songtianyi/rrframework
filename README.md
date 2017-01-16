@@ -3,7 +3,8 @@
 A collection of modules to make backend programming easier.
 
 ### Modules
-#### config
+
+#### config module
 configuration file parser, supporting formats:
 * json
 
@@ -28,7 +29,7 @@ fun main() {
 }
 ```
 
-#### connector
+#### connector module
 clients for third-party service, supporting services:
 * redis
 * zookeeper
@@ -63,7 +64,7 @@ func main() {
 }
 ```
 
-### handler
+### handler module
 tcp handler register
 
 ```go
@@ -84,7 +85,7 @@ func main() {
 }
 ```
 
-#### logs
+#### logs module
 loggers, supporting list:
 * console
 * file
@@ -95,7 +96,7 @@ loggers, supporting list:
 * smtp
 
 
-#### server
+#### server module
 tcp server
 
 ```go
@@ -112,7 +113,7 @@ func main() {
 }
 ```
 
-#### storage
+#### storage module
 storage sdks, supporting storage:
 * LocalDisk
 * UFile
@@ -134,7 +135,25 @@ func main() {
 }
 ```
 
-#### utils
+#### utils module
 A collection of tools, suporting list:
 * uuid
 * pprof
+
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/songtianyi/rrframework/utils"
+)
+
+func main() {
+	// uuid
+	uuid := rrutils.NewV4().String()
+	fmt.Println(uuid)
+
+	// pprof
+	rrutils.StartProfiling()
+}
+```
