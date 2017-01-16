@@ -29,7 +29,7 @@ fun main() {
 ```
 
 #### connector
-clients for third-party service, supporting service:
+clients for third-party service, supporting services:
 * redis
 * zookeeper
 
@@ -39,6 +39,7 @@ package main
 import (
 	"fmt"
 	"github.com/songtianyi/rrframework/connector/redis"
+	"github.com/songtianyi/rrframework/connector/zookeeper"
 )
 
 func main() {
@@ -84,7 +85,15 @@ func main() {
 ```
 
 #### logs
-loggers
+loggers, supporting list:
+* console
+* file
+* elasticsearch
+* jianliao
+* websocket
+* slack
+* smtp
+
 
 #### server
 tcp server
@@ -104,7 +113,7 @@ func main() {
 ```
 
 #### storage
-storage sdks, supporting storage
+storage sdks, supporting storage:
 * LocalDisk
 * UFile
 
@@ -119,6 +128,8 @@ func main() {
 		"privatekey",
 		"bucketname",
 		2)
+
+	// download file
 	se.Fetch("test.json")
 }
 ```
