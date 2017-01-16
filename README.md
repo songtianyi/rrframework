@@ -7,11 +7,10 @@ A collection of modules to make backend programming easier.
 configuration file parser, supporting formats:
 * json
 
-
 ```go
 package main
 import (
-        "github.com/songtianyi/rrframework/config"
+	"github.com/songtianyi/rrframework/config"
 	"fmt"
 )
 
@@ -30,5 +29,101 @@ fun main() {
 ```
 
 #### connector
+clients for third-party service, supporting service:
+* redis
+* zookeeper
 
-	
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/songtianyi/rrframework/connector/redis"
+)
+
+func main() {
+	// redis connector
+	err, rc := rrredis.GetRedisClient("127.0.0.1:6379")
+	if err != nil {
+		panic(err)
+	}
+	exist, err := rc.HMExists("TEST:KEY", "fool")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(exist)
+
+	// zk connector
+	err, zkc := rrzk.GetZkClient("192.168.150.74:2181,192.168.150.75:2181,192.168.150.132:2181")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(zkc)
+}
+```
+
+### handler
+tcp handler register
+
+```go
+package main
+
+import (
+	"github.com/songtianyi/rrframework/handler"
+	"fmt"
+)
+
+func echo(c interface{}, msg interface{}) {
+	fmt.Println("test")
+}
+
+func main() {
+	_, hr := rrhandler.CreateHandlerRegister()
+	hr.Add("rrfp.ExampleEchoRequest", rrhandler.Handler(echo), 0*time.Second)
+}
+```
+
+#### logs
+loggers
+
+#### server
+tcp server
+
+```go
+package main
+import (
+	"github.com/songtianyi/rrframework/server"
+)
+func main() {
+	err, s := rrserver.CreateTCPServer("0.0.0.0", 8003)
+	if err != nil {
+	    panic(err)
+	}
+	s.Start()
+}
+```
+
+#### storage
+storage sdks, supporting storage
+* LocalDisk
+* UFile
+
+```go
+package main
+import (
+	"github.com/songtianyi/rrframework/storage"
+)
+
+func main() {
+	se := rrstorage.CreateUfileStorage("publickey",
+		"privatekey",
+		"bucketname",
+		2)
+	se.Fetch("test.json")
+}
+```
+
+#### utils
+A collection of tools, suporting list:
+* uuid
+* pprof
