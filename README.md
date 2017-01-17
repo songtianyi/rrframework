@@ -25,6 +25,7 @@ import (
 )
 
 fun main() {
+	// json config parser
 	rc, err := rrconfig.LoadJsonConfigFromFile("config.json")
 	if err != nil {
 		panic(err)
@@ -34,6 +35,20 @@ fun main() {
 		panic(err)
 	}
 	fmt.Println(v)
+
+	// ini config parser
+	ic, err := rrconfig.LoadIniConfigFromFile("test.ini")
+	if err != nil {
+		panic(err)
+	}
+	// get value by key
+	s, err := ic.Get("test.a")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(s)
+	// dump
+	fmt.Println(ic.Dump())
 	
 }
 ```
