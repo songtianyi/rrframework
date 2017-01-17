@@ -150,13 +150,24 @@ import (
 )
 
 func main() {
+	// ufile
 	se := rrstorage.CreateUfileStorage("publickey",
 		"privatekey",
 		"bucketname",
 		2)
 
-	// download file
-	se.Fetch("test.json")
+	// download file for ufile storage
+	_, err = se.Fetch("test.json")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// local disk
+	ls := rrstorage.CreateLocalDiskStorage("/data/files/")
+	if err := ls.Save([]bytes("hehe"), "test.txt"); err != nil {
+		fmt.Println(err)
+	}
 }
 ```
 
