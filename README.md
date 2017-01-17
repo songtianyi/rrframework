@@ -16,6 +16,7 @@ A collection of modules to make backend programming easier.
 #### config module
 configuration file parser, supporting formats:
 * json
+* ini
 
 ```go
 package main
