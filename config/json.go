@@ -75,12 +75,13 @@ func (s *JsonConfig) Get(key string) (interface{}, error) {
 }
 
 func (s *JsonConfig) GetStringSlice(key string) ([]string, error) {
+	empty := []string{}
 	f, err := s.Get(key)
 	if err != nil {
-		return nil, err
+		return empty, err
 	}
 	if _, ok := f.([]interface{}); !ok {
-		return nil, fmt.Errorf("value for key %s is not slice", key)
+		return empty, fmt.Errorf("value for key %s is not slice", key)
 	}
 	sf := f.([]interface{})
 	ss := make([]string, len(sf))
@@ -88,7 +89,7 @@ func (s *JsonConfig) GetStringSlice(key string) ([]string, error) {
 		if vv, ok := v.(string); ok {
 			ss[i] = vv
 		} else {
-			return nil, fmt.Errorf("%s[%d] is not a string", key, i)
+			return empty, fmt.Errorf("%s[%d] is not a string", key, i)
 		}
 	}
 	return ss, nil
