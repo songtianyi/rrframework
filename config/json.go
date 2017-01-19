@@ -11,9 +11,7 @@ import (
 
 type JsonConfig struct {
 	m     map[string]interface{}
-	cache map[string]interface{}
 	rb    []byte
-	mu    sync.RWMutex
 }
 
 func LoadJsonConfigFromFile(path string) (*JsonConfig, error) {
@@ -31,7 +29,6 @@ func LoadJsonConfigFromBytes(b []byte) (*JsonConfig, error) {
 	}
 	s := &JsonConfig{
 		m:     jm,
-		cache: make(map[string]interface{}),
 		rb:    b,
 	}
 	return s, nil
@@ -47,24 +44,14 @@ func (s *JsonConfig) Dump() (string, error) {
 
 // Get("a.b.c")
 func (s *JsonConfig) Get(key string) (interface{}, error) {
-	s.mu.RLock()
-	if v, ok := s.cache[key]; ok {
-		s.mu.RUnlock()
-		return v, nil
-	}
-	s.mu.RUnlock()
 	nodes := strings.Split(key, ".")
 	m := s.m
 	for i := 0; i < len(nodes); i++ {
 		if v, ok := m[nodes[i]]; ok {
-			// exist
 			if vv, okk := v.(map[string]interface{}); okk {
 				// not end
 				m = vv
 			} else {
-				s.mu.Lock()
-				s.cache[key] = v
-				s.mu.Unlock()
 				return v, nil
 			}
 		} else {
@@ -115,5 +102,16 @@ func (s *JsonConfig) GetFloat64(key string) (float64, error) {
 		return 0.0, fmt.Errorf("value for key %s is not float64", key)
 	}
 	return f.(float64), nil
+}
+
+func (s *JsonConfig) GetInterfaceSlice(key string) ([]interface{}, error) {
+	f, err := s.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	if _, ok := f.([]interface{}); !ok {
+		return nil, fmt.Errorf("value for key %s is not []interface{}", key)
+	}
+	return f.([]interface{}), nil
 }
 
