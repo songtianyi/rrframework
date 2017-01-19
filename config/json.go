@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"strings"
-	"sync"
 )
 
 type JsonConfig struct {
