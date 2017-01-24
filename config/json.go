@@ -92,6 +92,17 @@ func (s *JsonConfig) GetString(key string) (string, error) {
 	return f.(string), nil
 }
 
+func (s *JsonConfig) GetInt(key string) (int, error) {
+	f, err := s.Get(key)
+	if err != nil {
+		return 0, err
+	}
+	if _, ok := f.(float64); !ok {
+		return 0, fmt.Errorf("value for key %s is not int", key)
+	}
+	return int(f.(float64)), nil
+}
+
 func (s *JsonConfig) GetFloat64(key string) (float64, error) {
 	f, err := s.Get(key)
 	if err != nil {
