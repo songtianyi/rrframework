@@ -14,7 +14,9 @@ type LocalDiskStorage struct {
 // Create a LocalDiskStorage instance
 func CreateLocalDiskStorage(dir string) StorageWrapper {
 	// create dir
-	_ = os.MkdirAll(dir, os.ModeDir)
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		_ = os.MkdirAll(dir, os.ModeDir)
+	}
 	// check dir
 	s := &LocalDiskStorage{
 		Dir: strings.TrimSuffix(dir, "/"),
