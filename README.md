@@ -2,6 +2,13 @@
 
 A collection of modules to make backend programming easier.
 
+### golang.org/x dep install
+```
+mkdir $GOPATH/src/golang.org/x
+cd $GOPATH/src/golang.org/x
+git clone https://github.com/golang/net.git
+```
+
 ### Catalog
 * [config](https://github.com/songtianyi/rrframework#config-module)
 * [connector](https://github.com/songtianyi/rrframework#connector-module)
