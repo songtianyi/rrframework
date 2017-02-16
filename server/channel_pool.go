@@ -15,14 +15,6 @@ type channelPool struct {
 	conns chan *TCPConnection
 }
 
-// Get a new reference of conns
-func (c *channelPool) getConns() chan *TCPConnection {
-	c.mu.Lock()
-	conns := c.conns
-	c.mu.Unlock()
-	return conns
-}
-
 func (c *channelPool) factory(addr string) (error, *TCPConnection) {
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
@@ -32,13 +24,12 @@ func (c *channelPool) factory(addr string) (error, *TCPConnection) {
 }
 
 func (c *channelPool) get(addr string) (error, *TCPConnection) {
-	conns := c.getConns()
-	if conns == nil {
+	if c.conns == nil {
 		return ErrClosed, nil
 	}
 
 	select {
-	case conn, ok := <-conns:
+	case conn, ok := <-c.conns:
 		if !ok || conn == nil {
 			return ErrClosed, nil
 		}
@@ -74,7 +65,7 @@ func (c *channelPool) add(conn *TCPConnection) error {
 }
 
 func (c *channelPool) closePool() {
-	// used when remote server down
+	// called when remote server down
 	c.mu.Lock()
 	conns := c.conns
 	c.conns = nil
@@ -90,4 +81,3 @@ func (c *channelPool) closePool() {
 	}
 }
 
-func (c *channelPool) lenOf() int { return len(c.getConns()) }
