@@ -11,7 +11,7 @@ var (
 )
 
 type channelPool struct {
-	mu sync.Mutex
+	mu    sync.Mutex
 	conns chan *TCPConnection
 }
 
@@ -78,4 +78,3 @@ func (c *channelPool) closePool() {
 		conn.Close()
 	}
 }
-
