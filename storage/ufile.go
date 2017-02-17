@@ -2,13 +2,13 @@ package rrstorage
 
 import (
 	"bytes"
-	"github.com/cheggaaa/pb"
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/json"
-	"github.com/songtianyi/rrframework/logs"
 	"fmt"
+	"github.com/cheggaaa/pb"
+	"github.com/songtianyi/rrframework/logs"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -21,7 +21,7 @@ type UfileStorage struct {
 	PrivateKey string
 	BucketName string
 
-	usema chan struct{}	// uploading concurrency limit
+	usema chan struct{} // uploading concurrency limit
 }
 
 const (
@@ -37,7 +37,7 @@ func CreateUfileStorage(pub, pri, bun string, ucl int) StorageWrapper {
 		PublicKey:  pub,
 		PrivateKey: pri,
 		BucketName: bun,
-		usema: make(chan struct{}, ucl),
+		usema:      make(chan struct{}, ucl),
 	}
 	return s
 }
@@ -200,7 +200,7 @@ func (s *UfileStorage) Save(content []byte, filename string) error {
 			return err
 		}
 		num := size / initRes.BlkSize
-		bar := pb.StartNew(num+1)
+		bar := pb.StartNew(num + 1)
 		etags := make([]string, 0)
 		var (
 			wg sync.WaitGroup
@@ -343,7 +343,7 @@ func (s *UfileStorage) Fetch(filename string) ([]byte, error) {
 	// partial
 	size -= lb
 	num := size / PARTIAL_SIZE
-	bar := pb.StartNew(num+1)
+	bar := pb.StartNew(num + 1)
 	// TODO concurrency
 	for i := 0; i <= num; i++ {
 		brange := "bytes="

@@ -43,7 +43,7 @@ func (s *IniConfig) Get(key string) (string, error) {
 	return "", fmt.Errorf("key %s not exist", key)
 }
 
-func (s *IniConfig) Dump() string{
+func (s *IniConfig) Dump() string {
 	rs := ""
 	for k, v := range s.secs {
 		rs += k + "=" + v + "\n"
@@ -80,7 +80,7 @@ func (s *IniConfig) doParse(buf *bufio.Reader) error {
 		if groups := assignRegex.FindStringSubmatch(line); groups != nil {
 			key, val := groups[1], groups[2]
 			key, val = strings.TrimSpace(key), strings.TrimSpace(val)
-			s.secs[section + key] = val
+			s.secs[section+key] = val
 		} else if groups := sectionRegex.FindStringSubmatch(line); groups != nil {
 			name := strings.TrimSpace(groups[1])
 			section = name + "."

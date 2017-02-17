@@ -9,8 +9,8 @@ import (
 )
 
 type JsonConfig struct {
-	m     map[string]interface{}
-	rb    []byte
+	m  map[string]interface{}
+	rb []byte
 }
 
 func LoadJsonConfigFromFile(path string) (*JsonConfig, error) {
@@ -27,8 +27,8 @@ func LoadJsonConfigFromBytes(b []byte) (*JsonConfig, error) {
 		return nil, err
 	}
 	s := &JsonConfig{
-		m:     jm,
-		rb:    b,
+		m:  jm,
+		rb: b,
 	}
 	return s, nil
 }
@@ -124,4 +124,3 @@ func (s *JsonConfig) GetInterfaceSlice(key string) ([]interface{}, error) {
 	}
 	return f.([]interface{}), nil
 }
-

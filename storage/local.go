@@ -34,7 +34,7 @@ func (s *LocalDiskStorage) Save(data []byte, filename string) error {
 	}
 	defer file.Close()
 	if _, err := file.Write(data); err != nil {
-		return err 
+		return err
 	}
 	return nil
 }
