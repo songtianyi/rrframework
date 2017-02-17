@@ -3,7 +3,6 @@ package rrserver
 import (
 	"fmt"
 	"net"
-	"sync"
 )
 
 var (
@@ -11,7 +10,6 @@ var (
 )
 
 type channelPool struct {
-	mu    sync.Mutex
 	conns chan *TCPConnection
 }
 
@@ -45,9 +43,6 @@ func (c *channelPool) add(conn *TCPConnection) error {
 		return fmt.Errorf("connection is nil")
 	}
 
-	c.mu.Lock()
-	defer c.mu.Unlock()
-
 	if c.conns == nil {
 		// pool is closed, cann't put it into pool
 		return conn.Close()
@@ -66,17 +61,12 @@ func (c *channelPool) add(conn *TCPConnection) error {
 
 func (c *channelPool) closePool() {
 	// called when remote server down
-	c.mu.Lock()
-	conns := c.conns
-	c.conns = nil
-	c.mu.Unlock()
-
-	if conns == nil {
+	if c.conns == nil {
 		return
 	}
 
-	close(conns)
-	for conn := range conns {
+	close(c.conns)
+	for conn := range c.conns {
 		conn.Close()
 	}
 }
