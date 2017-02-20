@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"reflect"
 	"strings"
 )
 
@@ -41,16 +42,21 @@ func (s *JsonConfig) Dump() (string, error) {
 	return string(rj.Bytes()), nil
 }
 
-// Get("a.b.c")
-func (s *JsonConfig) Get(key string) (interface{}, error) {
+// get("a.b.c")
+func (s *JsonConfig) get(key string, m map[string]interface{}) (interface{}, error) {
+	if m == nil {
+		m = s.m
+	}
 	nodes := strings.Split(key, ".")
-	m := s.m
 	for i := 0; i < len(nodes); i++ {
 		if v, ok := m[nodes[i]]; ok {
-			if vv, okk := v.(map[string]interface{}); okk {
-				// not end
-				m = vv
-			} else {
+			switch reflect.ValueOf(v).Kind() {
+			case reflect.Map:
+				if vv, okk := v.(map[string]interface{}); okk {
+					// not end
+					m = vv
+				}
+			default:
 				return v, nil
 			}
 		} else {
@@ -60,9 +66,80 @@ func (s *JsonConfig) Get(key string) (interface{}, error) {
 	return m, nil
 }
 
+// get("a.b.c")
+func (s *JsonConfig) getSliceChilds(key string, m map[string]interface{}) ([]interface{}, error) {
+	if m == nil {
+		m = s.m
+	}
+	nodes := strings.Split(key, ".")
+	fmt.Println(m, nodes)
+	for i := 0; i < len(nodes); i++ {
+		fmt.Println(i, m)
+		if v, ok := m[nodes[i]]; ok {
+			switch reflect.ValueOf(v).Kind() {
+			case reflect.Map:
+				if vv, okk := v.(map[string]interface{}); okk {
+					// not slice
+					m = vv
+				}
+			case reflect.Slice:
+				result := make([]interface{}, 0)
+				if vv, okk := v.([]interface{}); okk {
+					// may not end
+					for _, child := range vv {
+						if v1, ok1 := child.(map[string]interface{}); ok1 {
+							res, _ := s.get(strings.Join(nodes[i+1:], "."), v1)
+							result = append(result, res)
+						} else {
+							result = append(result, child)
+						}
+					}
+					return result, nil
+				}
+			}
+		} else {
+			return nil, fmt.Errorf("no value for key %s", key)
+		}
+	}
+	return nil, fmt.Errorf("can't get []interface{}")
+}
+
+// user funcs
+// leaf [{string}, {string}]
+func (s *JsonConfig) GetSliceString(key string) ([]string, error) {
+	is, err := s.getSliceChilds(key, nil)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]string, 0)
+	for _, v := range is {
+		result = append(result, v.(string))
+	}
+	return result, nil
+}
+
+// leaf [{int}, {int}]
+func (s *JsonConfig) GetSliceInt(key string) ([]int, error) {
+	is, err := s.getSliceChilds(key, nil)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]int, 0)
+	for _, v := range is {
+		result = append(result, int(v.(float64)))
+	}
+	return result, nil
+}
+
+// child {}
+func (s *JsonConfig) GetInterface(key string) (interface{}, error) {
+	return s.get(key, nil)
+}
+
+// leaf [string, string, ...]
 func (s *JsonConfig) GetStringSlice(key string) ([]string, error) {
 	empty := []string{}
-	f, err := s.Get(key)
+	f, err := s.get(key, nil)
 	if err != nil {
 		return empty, err
 	}
@@ -81,8 +158,9 @@ func (s *JsonConfig) GetStringSlice(key string) ([]string, error) {
 	return ss, nil
 }
 
+// leaf string
 func (s *JsonConfig) GetString(key string) (string, error) {
-	f, err := s.Get(key)
+	f, err := s.get(key, nil)
 	if err != nil {
 		return "", err
 	}
@@ -92,8 +170,9 @@ func (s *JsonConfig) GetString(key string) (string, error) {
 	return f.(string), nil
 }
 
+// leaf int
 func (s *JsonConfig) GetInt(key string) (int, error) {
-	f, err := s.Get(key)
+	f, err := s.get(key, nil)
 	if err != nil {
 		return 0, err
 	}
@@ -103,8 +182,9 @@ func (s *JsonConfig) GetInt(key string) (int, error) {
 	return int(f.(float64)), nil
 }
 
+// leaf float
 func (s *JsonConfig) GetFloat64(key string) (float64, error) {
-	f, err := s.Get(key)
+	f, err := s.get(key, nil)
 	if err != nil {
 		return 0.0, err
 	}
@@ -114,8 +194,9 @@ func (s *JsonConfig) GetFloat64(key string) (float64, error) {
 	return f.(float64), nil
 }
 
+// child [{}, {}, {}]
 func (s *JsonConfig) GetInterfaceSlice(key string) ([]interface{}, error) {
-	f, err := s.Get(key)
+	f, err := s.get(key, nil)
 	if err != nil {
 		return nil, err
 	}
