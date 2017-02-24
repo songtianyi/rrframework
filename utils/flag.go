@@ -50,10 +50,11 @@ func FlagDump() string {
 }
 
 func FlagGetInt() int {
+	return 0
 }
 
 func FlagGetString(option string) (string, error) {
-	if op := flag.LoopUp(option); op != nil {
+	if op := flag.Lookup(option); op != nil {
 		return op.Value.String(), nil
 	} else {
 		return "", fmt.Errorf("no option %s", option)
