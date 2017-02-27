@@ -49,6 +49,19 @@ func FlagDump() string {
 	return ret
 }
 
+func FlagIsSet(name string) bool {
+	check()
+	ret := false
+	fn := func(f *flag.Flag) {
+		if f.Name == name {
+			ret = true
+			return
+		}
+	}
+	flag.Visit(fn)
+	return ret
+}
+
 func FlagGetInt() int {
 	return 0
 }
@@ -58,5 +71,17 @@ func FlagGetString(option string) (string, error) {
 		return op.Value.String(), nil
 	} else {
 		return "", fmt.Errorf("no option %s", option)
+	}
+}
+
+func FlagGetBool(option string) (bool, error) {
+	if op := flag.Lookup(option); op != nil {
+		v := op.Value.String()
+		if v == "true" {
+			return true, nil
+		}
+		return false, nil
+	} else {
+		return false, fmt.Errorf("no option %s", option)
 	}
 }
