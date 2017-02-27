@@ -94,7 +94,7 @@ func (c *RedisClient) HMSet(key string, fields map[string]string) error {
 	return status.Err()
 }
 
-func (c *RedisClient) HMGet(key string, fields ...string) (interface{}, error) {
+func (c *RedisClient) HMGet(key string, fields ...string) ([]interface{}, error) {
 	status := c.c.HMGet(key, fields...)
 	return status.Result()
 }
