@@ -62,8 +62,17 @@ func FlagIsSet(name string) bool {
 	return ret
 }
 
-func FlagGetInt() int {
-	return 0
+func FlagGetInt() (int, error) {
+	if op := flag.Lookup(option); op != nil {
+		v := op.Value.String()
+		i, err := strconv.Atoi(v)
+		if err != nil {
+			return -1, err
+		}
+		return i, nil
+	} else {
+		return -1, fmt.Errorf("no option %s", option)
+	}
 }
 
 func FlagGetString(option string) (string, error) {
