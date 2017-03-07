@@ -64,6 +64,7 @@ func FlagIsSet(name string) bool {
 }
 
 func FlagGetInt(option string) (int, error) {
+	check()
 	if op := flag.Lookup(option); op != nil {
 		v := op.Value.String()
 		i, err := strconv.Atoi(v)
