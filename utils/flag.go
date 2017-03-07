@@ -27,6 +27,7 @@ package rrutils
 import (
 	"flag"
 	"fmt"
+	"strconv"
 )
 
 func check() {
@@ -62,7 +63,7 @@ func FlagIsSet(name string) bool {
 	return ret
 }
 
-func FlagGetInt() (int, error) {
+func FlagGetInt(option string) (int, error) {
 	if op := flag.Lookup(option); op != nil {
 		v := op.Value.String()
 		i, err := strconv.Atoi(v)
