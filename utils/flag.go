@@ -76,6 +76,7 @@ func FlagGetInt() (int, error) {
 }
 
 func FlagGetString(option string) (string, error) {
+	check()
 	if op := flag.Lookup(option); op != nil {
 		return op.Value.String(), nil
 	} else {
@@ -84,6 +85,7 @@ func FlagGetString(option string) (string, error) {
 }
 
 func FlagGetBool(option string) (bool, error) {
+	check()
 	if op := flag.Lookup(option); op != nil {
 		v := op.Value.String()
 		if v == "true" {
