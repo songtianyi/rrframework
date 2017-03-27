@@ -230,7 +230,7 @@ func (c *RedisClient) ZRangeByScoreWithScores(key, min, max string, offset, coun
 	return status.Result()
 }
 
-func (c *RedisClient) Incr(key string) (int64, erro) {
-	status := c.conn.Incr(key)
+func (c *RedisClient) Incr(key string) (int64, error) {
+	status := c.c.Incr(key)
 	return status.Result()
 }
