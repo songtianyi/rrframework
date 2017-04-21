@@ -72,9 +72,7 @@ func (s *JsonConfig) getSliceChilds(key string, m map[string]interface{}) ([]int
 		m = s.m
 	}
 	nodes := strings.Split(key, ".")
-	fmt.Println(m, nodes)
 	for i := 0; i < len(nodes); i++ {
-		fmt.Println(i, m)
 		if v, ok := m[nodes[i]]; ok {
 			switch reflect.ValueOf(v).Kind() {
 			case reflect.Map:
@@ -127,6 +125,19 @@ func (s *JsonConfig) GetSliceInt(key string) ([]int, error) {
 	result := make([]int, 0)
 	for _, v := range is {
 		result = append(result, int(v.(float64)))
+	}
+	return result, nil
+}
+
+// leaf [{int64}, {int64}]
+func (s *JsonConfig) GetSliceInt64(key string) ([]int64, error) {
+	is, err := s.getSliceChilds(key, nil)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]int64, 0)
+	for _, v := range is {
+		result = append(result, int64(v.(float64)))
 	}
 	return result, nil
 }
