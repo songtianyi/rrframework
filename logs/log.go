@@ -372,6 +372,11 @@ func (bl *BeeLogger) Critical(format string, v ...interface{}) {
 }
 
 // Error Log ERROR level message.
+func (bl *BeeLogger) Errorf(format string, v ...interface{}) {
+	bl.Error(format, v...)
+}
+
+// Error Log ERROR level message.
 func (bl *BeeLogger) Error(format string, v ...interface{}) {
 	if LevelError > bl.level {
 		return
@@ -395,6 +400,11 @@ func (bl *BeeLogger) Notice(format string, v ...interface{}) {
 // Informational Log INFORMATIONAL level message.
 func (bl *BeeLogger) Informational(format string, v ...interface{}) {
 	bl.Info(format, v...)
+}
+
+// Debug Log DEBUG level message.
+func (bl *BeeLogger) Debugf(format string, v ...interface{}) {
+	bl.Debug(format, v...)
 }
 
 // Debug Log DEBUG level message.
