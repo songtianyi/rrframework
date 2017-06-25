@@ -103,6 +103,11 @@ func (s *JsonConfig) getSliceChilds(key string, m map[string]interface{}) ([]int
 }
 
 // user funcs
+// get json raw bytes
+func (s *JsonConfig) GetBytes() []byte {
+	return s.rb
+}
+
 // leaf [{string}, {string}]
 func (s *JsonConfig) GetSliceString(key string) ([]string, error) {
 	is, err := s.getSliceChilds(key, nil)
