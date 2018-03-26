@@ -8,7 +8,7 @@ import (
 
 func StartProfiling() {
 	go func() {
-		if err := http.ListenAndServe("localhost:6060", nil); err != nil {
+		if err := http.ListenAndServe("0.0.0.0:6060", nil); err != nil {
 			logs.Error("Start profiling fail, %s", err)
 			return
 		}
