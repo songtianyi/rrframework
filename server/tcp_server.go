@@ -34,6 +34,18 @@ func CreateTCPServer(inf string, port int) (error, *TCPServer) {
 	return nil, s
 }
 
+func CreateTCPServerByAddr(addr string) (error, *TCPServer) {
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err, nil
+	}
+	s := &TCPServer{
+		ls:   listener,
+		port: port,
+	}
+	return nil, s
+}
+
 func (s *TCPServer) Start() {
 	logs.Info("Server listening in [%s]", s.ls.Addr())
 	for {
