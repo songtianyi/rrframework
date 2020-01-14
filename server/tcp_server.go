@@ -39,9 +39,17 @@ func CreateTCPServerByAddr(addr string) (error, *TCPServer) {
 	if err != nil {
 		return err, nil
 	}
+	parts := strings.Split(addr, ":")
+	if len(parts) != 2 {
+		return fmt.Errorf("addr invalid len=%d", len(parts))
+	}
+	p, err := strconv.Atoi(parts[1])
+	if err != nil {
+		return err
+	}
 	s := &TCPServer{
 		ls:   listener,
-		port: port,
+		port: p,
 	}
 	return nil, s
 }
