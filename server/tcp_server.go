@@ -1,10 +1,12 @@
 package rrserver
 
 import (
+	"fmt"
 	"github.com/songtianyi/rrframework/logs"
 	"io"
 	"net"
 	"strconv"
+	"strings"
 )
 
 var (
@@ -41,11 +43,11 @@ func CreateTCPServerByAddr(addr string) (error, *TCPServer) {
 	}
 	parts := strings.Split(addr, ":")
 	if len(parts) != 2 {
-		return fmt.Errorf("addr invalid len=%d", len(parts))
+		return fmt.Errorf("addr invalid len=%d", len(parts)), nil
 	}
 	p, err := strconv.Atoi(parts[1])
 	if err != nil {
-		return err
+		return err, nil
 	}
 	s := &TCPServer{
 		ls:   listener,
