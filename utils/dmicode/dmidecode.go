@@ -40,7 +40,7 @@ func (d *DMI) Run() error {
 }
 
 func (d *DMI) FindBin(binary string) (string, error) {
-	locations := []string{"/sbin", "/usr/sbin", "/usr/local/sbin", "/usr/bin", "/usr/local/bin",}
+	locations := []string{"/sbin", "/usr/sbin", "/usr/local/sbin", "/usr/bin", "/usr/local/bin"}
 
 	for _, path := range locations {
 		lookup := path + "/" + binary

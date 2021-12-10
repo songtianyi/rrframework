@@ -34,6 +34,7 @@
 package logs
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
@@ -43,6 +44,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/rs/xid"
 )
 
 // RFC5424 log message levels.
@@ -569,6 +572,22 @@ func SetLogger(adapter string, config ...string) error {
 	return nil
 }
 
+func TraceID(ctx context.Context) string {
+	var (
+		traceID string
+		ok      bool
+	)
+	if ctx == nil {
+		traceID = xid.New()
+	} else {
+		traceID, ok = ctx.Value("traceID").(string)
+		if !ok {
+			traceID = xid.New()
+		}
+	}
+	return "[ " + traceID + " ]"
+}
+
 // Emergency logs a message at emergency level.
 func Emergency(f interface{}, v ...interface{}) {
 	beeLogger.Emergency(formatLog(f, v...))
@@ -587,6 +606,11 @@ func Critical(f interface{}, v ...interface{}) {
 // Error logs a message at error level.
 func Error(f interface{}, v ...interface{}) {
 	beeLogger.Error(formatLog(f, v...))
+}
+
+// Error logs a message at error level with traceID prefix
+func ErrorCtx(ctx context.Context, f interface{}, v ...interface{}) {
+	beeLogger.Error(TraceID(ctx), formatLog(f, v...))
 }
 
 // Warning logs a message at warning level.
@@ -614,9 +638,19 @@ func Info(f interface{}, v ...interface{}) {
 	beeLogger.Info(formatLog(f, v...))
 }
 
+// Info compatibility alias for Warning() with traceID prefix
+func InfoCtx(ctx context.Context, f interface{}, v ...interface{}) {
+	beeLogger.Info(TraceID(ctx), formatLog(f, v...))
+}
+
 // Debug logs a message at debug level.
 func Debug(f interface{}, v ...interface{}) {
 	beeLogger.Debug(formatLog(f, v...))
+}
+
+// Debug logs a message at debug level with traceID prefix
+func DebugCtx(ctx context.Context, f interface{}, v ...interface{}) {
+	beeLogger.Debug(TraceID(ctx), formatLog(f, v...))
 }
 
 // Trace logs a message at trace level.
