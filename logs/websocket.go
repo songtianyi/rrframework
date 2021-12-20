@@ -79,7 +79,7 @@ func (s *WSWriter) WriteMsg(when time.Time, msg string, level int) error {
 	case s.msgs <- msg:
 	default:
 		// TODO msg drooped when s.msgs channel full
-		return fmt.Errorf("msg %s was discarded by WSWriter, cause s.msgs channel full, current size %d", len(s.msgs))
+		return fmt.Errorf("msg %s was discarded by WSWriter, cause s.msgs channel full, current size %d", msg, len(s.msgs))
 	}
 	return nil
 }

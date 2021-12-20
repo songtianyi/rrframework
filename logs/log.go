@@ -578,11 +578,11 @@ func TraceID(ctx context.Context) string {
 		ok      bool
 	)
 	if ctx == nil {
-		traceID = xid.New()
+		traceID = xid.New().String()
 	} else {
 		traceID, ok = ctx.Value("traceID").(string)
 		if !ok {
-			traceID = xid.New()
+			traceID = xid.New().String()
 		}
 	}
 	return "[ " + traceID + " ]"
