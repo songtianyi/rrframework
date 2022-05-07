@@ -93,7 +93,7 @@ func formatTimeHeader(when time.Time) ([]byte, int) {
 	y, mo, d := when.Date()
 	h, mi, s := when.Clock()
 	//len("20060102.150405 ")==16
-	var buf [18]byte
+	var buf [16]byte
 
 	buf[0] = y1[y/1000%10]
 	buf[1] = y2[y/100]
