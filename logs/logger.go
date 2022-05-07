@@ -92,29 +92,25 @@ const (
 func formatTimeHeader(when time.Time) ([]byte, int) {
 	y, mo, d := when.Date()
 	h, mi, s := when.Clock()
-	//len("2006/01/02 15:04:05 ")==20
-	var buf [20]byte
+	//len("20060102.150405 ")==16
+	var buf [18]byte
 
 	buf[0] = y1[y/1000%10]
 	buf[1] = y2[y/100]
 	buf[2] = y3[y-y/100*100]
 	buf[3] = y4[y-y/100*100]
-	buf[4] = '/'
-	buf[5] = mo1[mo-1]
-	buf[6] = mo2[mo-1]
-	buf[7] = '/'
-	buf[8] = d1[d-1]
-	buf[9] = d2[d-1]
-	buf[10] = ' '
-	buf[11] = h1[h]
-	buf[12] = h2[h]
-	buf[13] = ':'
-	buf[14] = mi1[mi]
-	buf[15] = mi2[mi]
-	buf[16] = ':'
-	buf[17] = s1[s]
-	buf[18] = s2[s]
-	buf[19] = ' '
+	buf[4] = mo1[mo-1]
+	buf[5] = mo2[mo-1]
+	buf[6] = d1[d-1]
+	buf[7] = d2[d-1]
+	buf[8] = '.'
+	buf[9] = h1[h]
+	buf[10] = h2[h]
+	buf[11] = mi1[mi]
+	buf[12] = mi2[mi]
+	buf[13] = s1[s]
+	buf[14] = s2[s]
+	buf[15] = ' '
 
 	return buf[0:], d
 }

@@ -24,5 +24,5 @@ func Test_TraceID(t *testing.T) {
 }
 
 func Test_ErrorCtx(t *testing.T) {
-        ErrorCtx(context.Background(), "good")
+	ErrorCtx(context.Background(), "good")
 }
